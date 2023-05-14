@@ -1,0 +1,77 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.core;
+
+
+import akka.http.scaladsl.model.HttpMethod
+import spray.json.{RootJsonFormat}
+
+import scala.util.Try
+
+//object because there can't be functions at the top level :-)
+object ResponseMappings {
+  sealed trait ResponseMapping[T]
+
+  //case class SingleResponseMapping[T](code: Int, format: RootJsonFormat[T]) extends ResponseMapping[T]
+  case class RangeResponseMapping[T](start: Int, end: Int, format: RootJsonFormat[T])
+      extends ResponseMapping[T]
+
+  def SingleResponseMapping[T](code: Int, format: RootJsonFormat[T]): RangeResponseMapping[T] =
+    RangeResponseMapping(code, code, format)
+  case class GenericErrorMapping[T](apply: (ApiError) => T) extends ResponseMapping[T]
+
+}
+
+case class ApiResponse[T](httpCode: Int, data: Try[T])
+
+case class ApiRequest[A <: Authentication, U, T](
+    endpoint: String,
+    httpMethod: HttpMethod,
+    body: U,
+    bodyFormat: RootJsonFormat[U],
+    responseMappings: Seq[ResponseMappings.ResponseMapping[T]],
+    inQuery: Map[String, QueryBuilding.QueryData],
+    inPath: Map[String, String],
+    inHeader: Map[String, HeaderBuilding.HeaderData]
+)
+// used to box references, which do not extend the Response
+// S is the Implementation, e.g: case Class Response200Box(boxes: SomeDefinition) extends ResponseBox[SomeDefinition, Response200Box]
+trait ResponseBox[T, S <: ResponseBox[T, S]] { val boxes: T }
+
+case class ApiError(errcode: String, error: Option[String])
+    extends Throwable(f"code: $errcode , message: $error")
+
+trait AdditionalFields[U <: AdditionalFields[U, T], T] {
+  def data: U                          = this.asInstanceOf[U]
+  def additionalFields: Map[String, T] = Map.empty
+
+  def withAdditional(fields: (String, T)*): AdditionalFields[U, T] = withAdditional(Map(fields: _*))
+  //dataTuples: (String,T)*
+  def withAdditional(fields: Map[String, T]): AdditionalFields[U, T] = {
+    val original = this
+    case object WithAddedFields extends AdditionalFields[U, T] {
+      override def data: U                          = original.data
+      override def additionalFields: Map[String, T] = original.additionalFields ++ fields
+    }
+    WithAddedFields
+  }
+}
+
+sealed trait Union0
+sealed trait Union1[A]
+sealed trait Union2[A, B]
+sealed trait Union3[A, B, C]
+sealed trait Union4[A, B, C, D]
+//sealed trait UnionN[T1,T2,T3, ... TN]
+
+final case class A[A_, B_, C_, D_](value: A_)
+    extends Union1[A_]
+    with Union2[A_, B_]
+    with Union3[A_, B_, C_]
+    with Union4[A_, B_, C_, D_]
+final case class B[A_, B_, C_, D_](value: B_)
+    extends Union2[A_, B_]
+    with Union3[A_, B_, C_]
+    with Union4[A_, B_, C_, D_]
+final case class C[A_, B_, C_, D_](value: C_) extends Union3[A_, B_, C_] with Union4[A_, B_, C_, D_]
+final case class D[A_, B_, C_, D_](value: D_) extends Union4[A_, B_, C_, D_]

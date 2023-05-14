@@ -1,0 +1,19 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.json.{{data.category.display_name}}
+
+import {{data.package_config.package_base}}.core._
+import {{data.package_config.package_base}}.json.DefinitionFormats._
+import {{data.package_config.package_base}}.model.Definitions
+import {{data.package_config.package_base}}.model.{{data.category.display_name}}.{{data.module_name}}Data._
+
+import {{data.package_config.package_base}}.json.core.CoreJsonFormats._
+import spray.json._
+import DefaultJsonProtocol._
+
+
+object {{data.module_name}}JsonFormats  {
+  {% for operation in data.operations %} 
+    {% with model=operation.container_model %}{% include 'json_model.j2'%}{%endwith%}
+  {% endfor %}
+}

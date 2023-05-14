@@ -1,0 +1,9 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.model
+
+import {{data.package_config.package_base}}.core._
+
+import spray.json.{JsObject, JsValue}
+
+{%with model=data%}{%include 'model.j2'%}{%endwith%}

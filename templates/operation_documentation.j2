@@ -1,0 +1,18 @@
+/**
+<h1>{{operation.operation_id}}</h1>
+{% if operation.deprecated %}
+@deprecated
+{%endif%}
+{% if operation.description%}
+{{operation.description}}
+{%endif%}
+{% for argument in operation.path_args %}
+{% include 'argument_javadoc.j2'%}
+{%endfor%}
+{% for argument in operation.query_args %}
+{% include 'argument_javadoc.j2'%}
+{%endfor%}
+{% for argument in operation.header_args %}
+{% include 'argument_javadoc.j2'%}
+{%endfor%}
+*/

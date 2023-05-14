@@ -1,0 +1,19 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.json
+
+import {{data.package_config.package_base}}.core._
+import {{data.package_config.package_base}}.model.EventSchemas
+import {{data.package_config.package_base}}.json.core.CoreJsonFormats._
+import {{data.package_config.package_base}}.json.DefinitionFormats._
+
+import spray.json._
+import DefaultJsonProtocol._
+
+object EventSchemaFormats {
+  {%if data.data.inner_models%}
+  {%for model in data.data.inner_models%}
+  {% include 'json_model.j2'%}
+  {%endfor%}
+  {%endif%}
+}

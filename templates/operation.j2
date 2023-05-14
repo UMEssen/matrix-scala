@@ -1,0 +1,69 @@
+{% include 'operation_documentation.j2'%}
+def {{operation.operation_id}}(
+  {%if operation.has_body%}
+    body: {%with type=operation.body_type%}{%include 'type.j2' %}{%endwith%},
+  {%endif%}
+  {%for argument in operation.path_args%}
+    {%-include 'argument.j2'%}
+  {%endfor-%}
+  {%for argument in operation.query_args%}
+    {%-include 'argument.j2'%}
+  {%endfor-%}
+  {%for argument in operation.header_args%}
+    {%-include 'argument.j2'%}
+  {%endfor-%}
+
+): ApiRequest[{{operation.security}},{%with type=operation.body_type%}{%include 'type.j2' %}{%endwith%}, {%with type=operation.response_type%}{%include 'type.j2' %}{%endwith%}] = ApiRequest(
+    endpoint = "{{operation.endpoint}}",
+    httpMethod = HttpMethods.{{operation.http_method}},
+    body = {%if operation.has_body%}body{%else%}JsObject(){%endif%},
+    bodyFormat = {%if operation.has_body%}implicitly[RootJsonFormat[{%with type=operation.body_type%}{%include 'type.j2' %}{%endwith%}]]{%else%}implicitly[RootJsonFormat[JsObject]]{%endif%},
+    responseMappings = Seq(
+      {%for response_type in operation.response_types%}
+        {%if (response_type.status_code_range.start == response_type.status_code_range.end) %}
+          SingleResponseMapping({{response_type.status_code_range.start}},
+        {%else%}
+          RangeResponseMapping({{response_type.status_code_range.start}},{{response_type.status_code_range.end}},
+        {%endif%}
+        {%if operation.response_types|length == 1%}
+        implicitly[RootJsonFormat[{%with type=response_type.type%}{%include 'type.j2'%}{%endwith%}]],
+        {%else%}
+
+        (implicitly[RootJsonFormat[{%with type=response_type.type%}{%include 'type.j2'%}{%endwith%}]]).asInstanceOf[RootJsonFormat[{%with type=operation.response_type%}{%include 'type.j2' %}{%endwith%}]],
+        {%endif%}
+      {%endfor%}
+      )
+    ) ,
+    inQuery=
+
+    {% if operation.query_args|length > 0%}
+    buildQuery(
+        {% for argument in operation.query_args %}
+            fromQueryEntry[{%with type=argument.type -%}{% include 'type.j2' %}{%- endwith%}]("{{argument.name}}" -> {% include 'argument_name.j2' %}),
+        {%endfor%}
+    ), 
+    {%else%}
+      Map.empty,
+    {%endif%}
+
+    inPath=
+    {% if operation.path_args|length > 0%}
+    Map(
+        {% for argument in operation.path_args %}
+            "{{argument.name}}"-> {% include 'argument_name.j2' %},
+        {%endfor%}
+    ),
+    {%else%}
+      Map.empty,
+    {%endif%}
+    inHeader=
+    {% if operation.header_args|length > 0%}
+    buildHeaders(
+        {% for argument in operation.header_args %}
+            fromHeaderEntry[{%with type=argument.type -%}{% include 'type.j2' %}{%- endwith%}]("{{argument.name}}" -> {% include 'argument_name.j2' %}),
+        {%endfor%}
+    ), 
+    {%else%}
+      Map.empty,
+    {%endif%}
+)

@@ -1,0 +1,10 @@
+{%if type.is_option%} = None{%endif%}
+{%if type.is_model%}
+{%with model=type.data.model%}
+{% if model.is_string_enum %}
+{% if model.data.values|length == 1%}
+ = {%- include 'model_path.j2' -%}.`{{model.data.values[0]}}`
+{%endif%}
+{%endif%}
+{%endwith%}
+{%endif%}

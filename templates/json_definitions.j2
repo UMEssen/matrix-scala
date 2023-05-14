@@ -1,0 +1,18 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.json
+
+import {{data.package_config.package_base}}.core._
+import {{data.package_config.package_base}}.model.Definitions
+import {{data.package_config.package_base}}.json.core.CoreJsonFormats._
+
+import spray.json._
+import DefaultJsonProtocol._
+
+object DefinitionFormats {
+  {%if data.data.inner_models%}
+  {%for model in data.data.inner_models%}
+  {% include 'json_lazy_model.j2' %}
+  {%endfor%}
+  {%endif%}
+}

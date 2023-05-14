@@ -1,0 +1,13 @@
+/**
+<h1>{{model.data.model_name}}</h1>
+{%if model.data.description%}
+  {{model.data.description}}
+{%endif%}
+{%if model.data.fields%}
+  {% for argument in model.data.fields %}
+    {% include 'argument_javadoc.j2'%}
+  {%endfor%}
+{%endif%}
+
+{%if model.data.defined_in_path%}@see "defined in {{model.data.defined_in_path}}"{%endif%}
+*/

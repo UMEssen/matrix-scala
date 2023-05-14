@@ -1,0 +1,14 @@
+{%if model.data.inner_models%}
+  {%for inner_model in model.data.inner_models%}
+  {%with model=inner_model%}{% include 'json_model.j2'%}{%endwith%}
+  {%endfor%}
+{%endif%}
+{%if model.is_data_model%}
+implicit val {%with delimiter=""%}{% include 'model_parent_join.j2'%}{%endwith%}Format: RootJsonFormat[{%- include 'model_path.j2'%}] = jsonFormat{%include 'model_fields_length.j2'%}({%- include 'model_path.j2'%}.apply)
+{%endif%}
+{%if model.is_string_enum%}
+{% include 'json_enum.j2' %}
+{%endif%}
+{%if model.is_response_box%}
+implicit val {%with delimiter=""%}{% include 'model_parent_join.j2'%}{%endwith%}Format: RootJsonFormat[{%- include 'model_path.j2'%}] = responseBoxFormat[{%with type=model.data.boxes%}{%- include 'type.j2' -%}{%endwith%}, {%- include 'model_path.j2'%}]({%- include 'model_path.j2'%}.apply)
+{%endif%}

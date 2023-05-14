@@ -1,0 +1,63 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.json.core
+
+import {{data.package_config.package_base}}.core.MatrixError
+import {{data.package_config.package_base}}.core.KnownMatrixErrors._
+import spray.json.{JsNull, JsObject, JsString, JsValue, RootJsonFormat}
+
+object MatrixErrorFormats {
+
+  private val knownErrorLookup: Map[String, (Option[String]) => MatrixError] = Map(
+    "M_FORBIDDEN"                       -> Forbidden,
+    "M_UNKNOWN_TOKEN"                   -> UnknownToken,
+    "M_MISSING_TOKEN"                   -> MissingToken,
+    "M_BAD_JSON"                        -> BadJson,
+    "M_NOT_JSON"                        -> NotJson,
+    "M_NOT_FOUND"                       -> NotFound,
+    "M_LIMIT_EXCEEDED"                  -> LimitExceeded,
+    "M_UNRECOGNIZED"                    -> Unrecognized,
+    "M_UNKNOWN"                         -> Unknown,
+    "M_UNAUTHORIZED"                    -> Unauthorized,
+    "M_USER_DEACTIVATED"                -> UserDeactivated,
+    "M_USER_IN_USE"                     -> UserInUse,
+    "M_INVALID_USERNAME"                -> InvalidUsername,
+    "M_ROOM_IN_USE"                     -> RoomInUse,
+    "M_INVALID_ROOM_STATE"              -> InvalidRoomState,
+    "M_THREEPID_IN_USE"                 -> ThreepidInUse,
+    "M_THREEPID_NOT_FOUND"              -> ThreepidNotFound,
+    "M_THREEPID_AUTH_FAILED"            -> ThreepidAuthFailed,
+    "M_THREEPID_DENIED"                 -> ThreepidDenied,
+    "M_SERVER_NOT_TRUSTED"              -> ServerNotTrusted,
+    "M_UNSUPPORTED_ROOM_VERSION"        -> UnsupportedRoomVersion,
+    "M_INCOMPATIBLE_ROOM_VERSION"       -> IncompatibleRoomVersion,
+    "M_BAD_STATE"                       -> BadState,
+    "M_GUEST_ACCESS_FORBIDDEN"          -> GuestAccessForbidden,
+    "M_CAPTCHA_NEEDED"                  -> CaptchaNeeded,
+    "M_CAPTCHA_INVALID"                 -> CaptchaInvalid,
+    "M_MISSING_PARAM"                   -> MissingParam,
+    "M_INVALID_PARAM"                   -> InvalidParam,
+    "M_TOO_LARGE"                       -> TooLarge,
+    "M_EXCLUSIVE"                       -> Exclusive,
+    "M_RESOURCE_LIMIT_EXCEEDED"         -> ResourceLimitExceeded,
+    "M_CANNOT_LEAVE_SERVER_NOTICE_ROOM" -> CannotLeaveServerNoticeRoom
+  )
+
+  implicit object MatrixErrorFormat extends RootJsonFormat[MatrixError] {
+    override def write(error: MatrixError): JsValue =
+      JsObject(
+        "errcode" -> JsString(error.errcode),
+        "error"     -> error.error.map(JsString(_)).getOrElse(JsNull)
+      )
+
+    override def read(json: JsValue): MatrixError = {
+      val obj       = json.asJsObject
+      val errcode = obj.getFields("errcode").head.asInstanceOf[JsString].value
+      val error     = obj.getFields("error").headOption.collect { case JsString(s) => Some(s) }.flatten
+      knownErrorLookup
+        .get(errcode)
+        .map(apply => apply(error))
+        .getOrElse(Other(errcode, error))
+    }
+  }
+}

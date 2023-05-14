@@ -1,0 +1,30 @@
+{% if model.data.inner_models %}
+  object {{model.data.model_name}} {
+    {% for inner_model in model.data.inner_models%}
+      {%with model=inner_model%}{% include 'model.j2' %}{%endwith%}
+    {% endfor%}
+  }
+{% endif %}
+{% if model.is_data_model %}
+  {% include 'model_documentation.j2' %}
+  case class {{model.data.model_name}}(
+    {% include 'model_fields.j2' %}
+  )
+  {%if model.data.of_response_trait%}
+    extends {%with model=model.data.of_response_trait%}{%- include 'model_path.j2' -%}{%endwith%}
+  {%endif%}
+  {%if model.data.additional_type%} extends AdditionalFields[{% include 'model_path.j2' %},{%with type=model.data.additional_type%}{% include 'type.j2'%}{%endwith%}]{%endif%}
+{%endif%}
+{% if model.is_string_enum %}
+  object {{model.data.model_name}} extends Enumeration {
+    {% for field in model.data.values%}
+      val `{{field}}`: Value = Value("{{field}}")
+    {%endfor%}
+  }
+{%endif%}
+{% if model.is_responses_trait%}
+  sealed trait {{model.data.model_name}}
+{%endif%}
+{%if model.is_response_box%}
+  case class {{model.data.model_name}}(boxes: {%with type=model.data.boxes%}{%- include 'type.j2' -%}{%endwith%}) extends ResponseBox[{%with type=model.data.boxes%}{%- include 'type.j2' -%}{%endwith%}, {{model.data.model_name}}] with {%with model=model.data.of_response_trait%}{%- include 'model_path.j2' -%}{%endwith%}
+{%endif%}

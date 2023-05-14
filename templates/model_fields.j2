@@ -1,0 +1,18 @@
+{% if model.data.compositions %}
+   {% for comp in model.data.compositions %}
+      {% with model=comp.origin%}
+      //composite start {% include 'model_path.j2'%}
+      {%endwith%}
+      {%with fields=comp.fields%}
+        {%include 'fields.j2'%}
+      {%endwith%}
+      // composite end
+   {% endfor %}
+
+{%endif%} 
+
+{% if model.data.fields %}
+  {%with fields=model.data.fields%}
+    {%include 'fields.j2'%}
+  {%endwith%}
+{%endif%}

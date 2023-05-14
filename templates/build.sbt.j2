@@ -1,0 +1,15 @@
+{% include 'header.j2' %}
+version := "{{data.package_config.version}}"
+name := "{{data.package_config.project_name}}"
+organization := "{{data.package_config.group_id}}"
+
+scalaVersion := "{{data.package_config.scala_version}}"
+
+libraryDependencies ++= Seq(
+    "com.typesafe.akka" %% "akka-http" % "{{data.package_config.akka_http_version}}",
+    "com.typesafe.akka" %% "akka-http-spray-json" % "{{data.package_config.akka_http_version}}",
+    "com.typesafe.akka" %% "akka-actor-typed" % "{{data.package_config.akka_version}}",
+    "com.typesafe.akka" %% "akka-stream" % "{{data.package_config.akka_version}}",
+    "io.spray" %%  "spray-json" % "{{data.package_config.spray_json_version}}",
+)
+

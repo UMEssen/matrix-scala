@@ -1,0 +1,24 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.api.{{data.category.display_name}}
+
+import {{data.package_config.package_base}}.model.Definitions
+import {{data.package_config.package_base}}.model.{{data.category.display_name}}.{{data.module_name}}Data._
+import {{data.package_config.package_base}}.json.{{data.category.display_name}}.{{data.module_name}}JsonFormats._
+import {{data.package_config.package_base}}.json.DefinitionFormats._
+import {{data.package_config.package_base}}.core._
+import {{data.package_config.package_base}}.core.ResponseMappings._
+import {{data.package_config.package_base}}.core.QueryBuilding._
+import {{data.package_config.package_base}}.core.HeaderBuilding._
+import akka.http.scaladsl.model.HttpMethods
+import spray.json.{JsObject, JsValue, RootJsonFormat}
+import spray.json.DefaultJsonProtocol._
+
+/**
+* @see "defined in {{data.defined_in_path}}"
+*/
+object {{data.module_name}}Api  {
+  {% for operation in data.operations %} 
+    {% include 'operation.j2' %}
+  {% endfor %}
+}

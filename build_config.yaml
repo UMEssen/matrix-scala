@@ -1,0 +1,14 @@
+#TODO: a version should somehow be linked to a git revision of matrix-spec
+version: 1.0.0
+project_name: matrix-scala
+package_base: de.ship.matrixscala
+author: kirill.sokol@uk-essen.de
+group_id: de.ship
+
+
+#dependency versions
+scala_version: "2.13.7"
+akka_http_version: "10.2.8"
+akka_version: "2.6.8"
+spray_json_version: "1.3.6"
+scalafmt_version: "2.4.2"

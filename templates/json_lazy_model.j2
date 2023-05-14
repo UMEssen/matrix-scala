@@ -1,0 +1,26 @@
+{%if model.data.inner_models%}
+ {%for inner_model in model.data.inner_models%}
+   {%with model=inner_model%}{% include 'json_lazy_model.j2' %}{%endwith%}
+ {%endfor%}
+{%endif%}
+{%if model.is_data_model%}
+ implicit val {%with delimiter=""%}{% include 'model_parent_join.j2'%}{%endwith%}LazyFormat: RootJsonFormat[{%- include 'model_path.j2'%}] = rootFormat(lazyFormat(
+  jsonFormat{%if model.data.count_fields() == 0%}0{%endif%}(
+       {%- include 'model_path.j2'%}{%if model.data.inner_models%}.apply {%if model.data.count_fields() <= 1%}_ {%endif%}{%endif%}, 
+       {% if model.data.compositions %}
+        {% for comp in model.data.compositions %}
+          {% for arg in comp.fields%}
+           "{{arg.name}}",
+            {% endfor %}
+           {% endfor %}
+      {%endif%} 
+        {% if model.data.fields %}
+          {% for arg in model.data.fields%}
+           "{{arg.name}}",
+          {% endfor %}
+       {% endif %}
+ )))
+{%endif%}
+{%if model.is_string_enum%}
+  {% include 'json_enum.j2' %}
+{%endif%}

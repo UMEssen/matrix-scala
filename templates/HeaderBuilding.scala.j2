@@ -1,0 +1,25 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.core
+
+//analogues to QueryBuilding, just more simple
+object HeaderBuilding {
+  type HeaderData = String
+
+  sealed trait HeaderComponentBuilder[T] {
+    def build(data: T): Option[HeaderData]
+  }
+
+  implicit object stringHeaderBuilder extends HeaderComponentBuilder[String] {
+    override def build(data: String): Option[HeaderData] = Some(data)
+  }
+
+  implicit object optionalStringHeaderBuilder extends HeaderComponentBuilder[Option[String]]{
+    override def build(data: Option[String]): Option[HeaderData] = data
+  }
+
+  def buildHeaders(entries: Option[(String, HeaderData)]*): Map[String, HeaderData] = entries.flatten.toMap
+  
+  def fromHeaderEntry[T](t: (String, T))(implicit builder: HeaderComponentBuilder[T]): Option[(String, HeaderData)] = builder.build(t._2).map(t._1 -> _)
+
+}

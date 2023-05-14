@@ -1,0 +1,16 @@
+{% include 'header.j2' %}
+
+package {{data.package_config.package_base}}.model.{{data.category.display_name}}
+
+import {{data.package_config.package_base}}.model.Definitions
+
+import {{data.package_config.package_base}}.core._
+
+import spray.json.{JsObject, JsValue}
+
+
+object {{data.module_name}}Data  {
+  {% for operation in data.operations %} 
+    {% with model=operation.container_model %}{% include 'model.j2'%}{%endwith%}
+  {% endfor %}
+}

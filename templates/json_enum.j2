@@ -1,0 +1,1 @@
+implicit val {%with delimiter=""%}{% include 'model_parent_join.j2'%}{%endwith%}Format: RootJsonFormat[{%- include 'model_path.j2'%}.Value] = new EnumJsonConverter({%- include 'model_path.j2'%})

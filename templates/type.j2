@@ -1,0 +1,21 @@
+{%- if type.is_primitive -%}
+{{type.data.type}}
+{%- elif type.is_model -%}
+{%with model=type.data.model %}{%- include 'model_path.j2' -%}{%if model.is_string_enum%}.Value{%endif%}{%endwith%}
+{%- elif type.is_unit -%}
+Unit
+{%- elif type.is_generic -%}
+JsObject
+{%- elif type.is_generic_value -%}
+JsValue
+{%- elif type.is_listy -%}
+Seq[{%with type=type.data.inner_type %}{%- include 'type.j2' -%}{%endwith%}]
+{%- elif type.is_map -%}
+Map[String,{%with type=type.data.inner_type %}{%- include 'type.j2' -%}{%endwith%}]
+{%- elif type.is_option -%}
+Option[{%with type=type.data.inner_type %}{%- include 'type.j2' -%}{%endwith%}]
+{%- elif type.is_union -%}
+Union{{type.data.inner_types|length}}[{%for type in type.data.inner_types%}{%- include 'type.j2' -%}{%if not loop.last%}, {%endif%}{%endfor%}]
+{%-else-%}
+JsObject/* FAILED TO DETERMINE TYPE */
+{%-endif-%}
